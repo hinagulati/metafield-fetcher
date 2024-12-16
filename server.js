@@ -6,8 +6,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ACCESS_TOKEN = 'your-shopify-access-token';
-const SHOPIFY_STORE_URL = 'https://your-shop.myshopify.com';
+// Replace with your Shopify store's access token and store URL
+const ACCESS_TOKEN = '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'; // Replace with your Shopify Admin API Access Token
+const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 
 // Helper function to delay execution (throttle requests)
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
