@@ -4,7 +4,7 @@ const cors = require('cors');
 const app = express();
 
 // Replace with your Shopify store's access token and store URL
-const ACCESS_TOKEN = 'c42fa43efd78ee9864f8beb932f1cb05'; // Replace with your Shopify Admin API Access Token
+const ACCESS_TOKEN = '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'; // Replace with your Shopify Admin API Access Token
 const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 
 // Enable CORS for frontend
