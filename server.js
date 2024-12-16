@@ -8,8 +8,8 @@ app.use(cors()); // Allow requests from all origins (adjust as needed)
 app.use(express.json());
 
 // Replace with your Shopify store's access token and store URL
-const ACCESS_TOKEN = 'your-shopify-access-token'; // Use your token here
-const SHOPIFY_STORE_URL = 'https://your-shop.myshopify.com';
+const ACCESS_TOKEN = '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'; // Replace with your Shopify Admin API Access Token
+const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 
 // Route to fetch products by author
 app.get('/fetch-products-by-author', async (req, res) => {
