@@ -7,9 +7,9 @@ const app = express();
 const ACCESS_TOKEN = 'c42fa43efd78ee9864f8beb932f1cb05'; // Replace with your Shopify Admin API Access Token
 const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 
-// Enable CORS for specific origins (replace with your store URL)
+// Enable CORS for your Shopify store
 app.use(cors({
-  origin: ['https://k0e2gg-bs.myshopify.com'], // Allow your Shopify store to access this backend
+  origin: 'https://peacockbooks.com', // Replace with your Shopify store URL
   methods: ['GET'], // Allow only GET requests
 }));
 
