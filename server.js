@@ -1,39 +1,53 @@
 const express = require('express');
 const axios = require('axios');
-const cors = require('cors'); // Import cors
+const cors = require('cors');
 const app = express();
 
 // Replace with your Shopify store's access token and store URL
 const ACCESS_TOKEN = 'c42fa43efd78ee9864f8beb932f1cb05'; // Replace with your Shopify Admin API Access Token
 const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 
-// Enable CORS for your Shopify store
+// Enable CORS for frontend
 app.use(cors({
-  origin: 'https://peacockbooks.com', // Replace with your Shopify store URL
-  methods: ['GET'], // Allow only GET requests
+  origin: 'https://peacockbooks.com', // Replace with your store's domain
 }));
 
 app.use(express.json());
 
-// Route to fetch metafields for a product
-app.get('/fetch-metafields/:productId', (req, res) => {
-  const productId = req.params.productId;
+// Route to fetch products by author metafield
+app.get('/fetch-products/:author', async (req, res) => {
+  const author = req.params.author; // e.g., "william-shakespeare"
 
-  // Shopify Admin API endpoint for metafields
-  const metafieldsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products/${productId}/metafields.json`;
+  try {
+    // Shopify Admin API endpoint for products
+    const productsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`;
 
-  axios.get(metafieldsUrl, {
-    headers: {
-      'Authorization': `Bearer ${ACCESS_TOKEN}`, // Authenticate using the API access token
-    },
-  })
-    .then(response => {
-      res.json(response.data); // Return metafields as JSON
-    })
-    .catch(error => {
-      console.error('Error fetching metafields:', error.response?.data || error.message);
-      res.status(500).send('Error fetching metafields');
+    const response = await axios.get(productsUrl, {
+      headers: {
+        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+      },
+      params: {
+        // Filter products by metafields
+        'metafield.namespace': 'custom', // Replace with your metafield namespace
+        'metafield.key': 'author',      // Replace with your metafield key
+        'metafield.value': author,      // Filter products with matching author value
+      },
     });
+
+    // Extract relevant product details
+    const products = response.data.products.map(product => ({
+      id: product.id,
+      title: product.title,
+      image: product.image?.src || '', // Get product image
+      price: product.variants[0]?.price || '', // Get price
+      compareAtPrice: product.variants[0]?.compare_at_price || '', // Compare price
+    }));
+
+    res.json(products); // Return products as JSON
+  } catch (error) {
+    console.error('Error fetching products:', error.response?.data || error.message);
+    res.status(500).send('Error fetching products');
+  }
 });
 
 // Start the server
