@@ -43,7 +43,7 @@ app.get('/fetch-products-by-author', async (req, res) => {
 
       const metafields = metafieldsResponse.data.metafields;
       
-       console.log(`Metafields for product ${product.id}:`, metafields); // Log metafields
+       //console.log(`Metafields for product ${product.id}:`, metafields); // Log metafields
 
       const authorMetafield = metafields.find(
         (mf) => mf.key === 'author' && mf.value === author
