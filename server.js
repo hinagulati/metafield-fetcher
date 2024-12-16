@@ -1,19 +1,18 @@
 const express = require('express');
 const axios = require('axios');
-const { request, gql } = require('graphql-request');
 const cors = require('cors');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Shopify Admin API Credentials
 const ACCESS_TOKEN = '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';
 const SHOPIFY_GRAPHQL_URL = 'https://k0e2gg-bs.myshopify.com/admin/api/2024-01/graphql.json';
 
-// GraphQL Query to Fetch Products by Metafield
+// Dynamically import graphql-request
+const { request, gql } = await import('graphql-request');
+
 const GET_PRODUCTS_QUERY = gql`
   query getProducts($cursor: String, $author: String!) {
     products(first: 100, after: $cursor, query: $author) {
@@ -54,11 +53,10 @@ const GET_PRODUCTS_QUERY = gql`
   }
 `;
 
-// Route to Fetch Products by Author
 app.get('/fetch-products-by-author/:author', async (req, res) => {
-  const author = req.params.author; // e.g., "william-shakespeare"
+  const author = req.params.author;
   let products = [];
-  let cursor = null; // For pagination
+  let cursor = null;
 
   try {
     do {
@@ -79,11 +77,9 @@ app.get('/fetch-products-by-author/:author', async (req, res) => {
       const productEdges = response.products.edges;
       const pageInfo = response.products.pageInfo;
 
-      // Map products and check metafields for the correct author
       for (const edge of productEdges) {
         const product = edge.node;
 
-        // Extract metafields
         const authorMetafield = product.metafields.edges.find(
           (mf) => mf.node.key === 'author' && mf.node.value === author
         );
@@ -110,7 +106,6 @@ app.get('/fetch-products-by-author/:author', async (req, res) => {
   }
 });
 
-// Start Server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
