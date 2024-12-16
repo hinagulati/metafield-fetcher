@@ -38,7 +38,7 @@ app.get('/fetch-products-by-author/:author', async (req, res) => {
       const authorMetafield = metafieldsResponse.data.metafields.find(
         metafield => metafield.namespace === 'author' && metafield.value === authorName
       );
-
+console.log(authorMetafield );
       // If the metafield matches, add the product to the filtered list
       if (authorMetafield) {
         filteredProducts.push({
@@ -50,7 +50,7 @@ app.get('/fetch-products-by-author/:author', async (req, res) => {
         });
       }
     }
-
+console.log(filteredProducts);
     // Return the filtered products
     res.json(filteredProducts);
 
