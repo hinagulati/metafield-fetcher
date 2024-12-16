@@ -20,11 +20,11 @@ app.get('/fetch-products/:author', async (req, res) => {
 
   try {
     // Shopify Admin API endpoint for products
-    const productsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`;
+    const productsUrl = 'https://k0e2gg-bs.myshopify.com/admin/api/2024-01/products.json';
 
     const response = await axios.get(productsUrl, {
       headers: {
-        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+        'Authorization': `Bearer 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`,
       },
       params: {
         // Filter products by metafields
