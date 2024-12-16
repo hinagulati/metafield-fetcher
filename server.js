@@ -46,12 +46,15 @@ app.get('/fetch-products/:author', async (req, res) => {
       await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
 
       const metafields = await fetchMetafields(product.id);
-
+      
+console.log(`Metafields for Product ID ${product.id}:`, metafields); // Debugging log
+      
       // Check if the product's metafields match the author
       const authorMetafield = metafields.find(
         (mf) => mf.namespace === 'custom' && mf.key === 'author' && mf.value === author
       );
 
+      
       if (authorMetafield) {
         filteredProducts.push({
           id: product.id,
