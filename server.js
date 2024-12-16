@@ -42,7 +42,9 @@ app.get('/fetch-products-by-author', async (req, res) => {
       });
 
       const metafields = metafieldsResponse.data.metafields;
-      console.log(metafields);
+      
+       console.log(`Metafields for product ${product.id}:`, metafields); // Log metafields
+
       const authorMetafield = metafields.find(
         (mf) => mf.key === 'author' && mf.value === author
       );
@@ -57,7 +59,7 @@ app.get('/fetch-products-by-author', async (req, res) => {
         });
       }
     }
-
+ console.log('Filtered Products:', filteredProducts); // Log final filtered products
     res.json({ products: filteredProducts });
   } catch (error) {
     console.error('Error fetching products:', error.response?.data || error.message);
