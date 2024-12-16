@@ -1,10 +1,17 @@
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors'); // Import cors
 const app = express();
 
 // Replace with your Shopify store's access token and store URL
 const ACCESS_TOKEN = 'c42fa43efd78ee9864f8beb932f1cb05'; // Replace with your Shopify Admin API Access Token
 const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
+
+// Enable CORS for specific origins (replace with your store URL)
+app.use(cors({
+  origin: ['https://k0e2gg-bs.myshopify.com'], // Allow your Shopify store to access this backend
+  methods: ['GET'], // Allow only GET requests
+}));
 
 app.use(express.json());
 
@@ -17,7 +24,7 @@ app.get('/fetch-metafields/:productId', (req, res) => {
 
   axios.get(metafieldsUrl, {
     headers: {
-      'Authorization': `Bearer ${ACCESS_TOKEN}`,
+      'Authorization': `Bearer ${ACCESS_TOKEN}`, // Authenticate using the API access token
     },
   })
     .then(response => {
