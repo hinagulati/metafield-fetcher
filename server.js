@@ -1,108 +1,66 @@
-import express from 'express';
-import { request, gql } from 'graphql-request';
-import cors from 'cors';
-
+const express = require('express');
+const axios = require('axios');
+const cors = require('cors');
 const app = express();
+
+// Replace with your Shopify store's access token and store URL
+const ACCESS_TOKEN = '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'; // Replace with your access token
+const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com'; // Replace with your Shopify store URL
 
 app.use(cors());
 app.use(express.json());
 
-const ACCESS_TOKEN = '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';
-const SHOPIFY_GRAPHQL_URL = 'https://k0e2gg-bs.myshopify.com/admin/api/2024-01/graphql.json';
-
-const GET_PRODUCTS_QUERY = gql`
-  query getProducts($cursor: String, $author: String!) {
-    products(first: 100, after: $cursor, query: $author) {
-      edges {
-        node {
-          id
-          title
-          images(first: 1) {
-            edges {
-              node {
-                src
-              }
-            }
-          }
-          variants(first: 1) {
-            edges {
-              node {
-                price
-                compareAtPrice
-              }
-            }
-          }
-          metafields(namespace: "custom", first: 10) {
-            edges {
-              node {
-                key
-                value
-              }
-            }
-          }
-        }
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-    }
-  }
-`;
-
+// Endpoint to fetch products filtered by metafield author
 app.get('/fetch-products-by-author/:author', async (req, res) => {
-  const author = req.params.author;
-  let products = [];
-  let cursor = null;
+  const authorName = req.params.author; // Capture the author name from the URL
 
   try {
-    do {
-      const variables = {
-        cursor,
-        author: `metafield:custom.author:${author}`,
-      };
+    // Fetch all products
+    const productsResponse = await axios.get(`${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`, {
+      headers: {
+        'X-Shopify-Access-Token': ACCESS_TOKEN
+      }
+    });
 
-      const response = await request(
-        SHOPIFY_GRAPHQL_URL,
-        GET_PRODUCTS_QUERY,
-        variables,
-        {
-          Authorization: `Bearer ${ACCESS_TOKEN}`,
+    const products = productsResponse.data.products;
+    
+    // Filter products by metafield author
+    const filteredProducts = [];
+
+    for (let product of products) {
+      const metafieldsResponse = await axios.get(`${SHOPIFY_STORE_URL}/admin/api/2024-01/products/${product.id}/metafields.json`, {
+        headers: {
+          'X-Shopify-Access-Token': ACCESS_TOKEN
         }
+      });
+
+      // Check if the product has the 'author' metafield matching the provided author name
+      const authorMetafield = metafieldsResponse.data.metafields.find(
+        metafield => metafield.namespace === 'author' && metafield.value === authorName
       );
 
-      const productEdges = response.products.edges;
-      const pageInfo = response.products.pageInfo;
-
-      for (const edge of productEdges) {
-        const product = edge.node;
-
-        const authorMetafield = product.metafields.edges.find(
-          (mf) => mf.node.key === 'author' && mf.node.value === author
-        );
-
-        if (authorMetafield) {
-          products.push({
-            id: product.id,
-            title: product.title,
-            image: product.images.edges[0]?.node.src || '',
-            price: product.variants.edges[0]?.node.price || '',
-            compareAtPrice:
-              product.variants.edges[0]?.node.compareAtPrice || '',
-          });
-        }
+      // If the metafield matches, add the product to the filtered list
+      if (authorMetafield) {
+        filteredProducts.push({
+          id: product.id,
+          title: product.title,
+          image: product.images.length > 0 ? product.images[0].src : null,
+          price: product.variants[0].price, // Assuming the first variant
+          compareAtPrice: product.variants[0].compare_at_price
+        });
       }
+    }
 
-      cursor = pageInfo.hasNextPage ? pageInfo.endCursor : null;
-    } while (cursor);
+    // Return the filtered products
+    res.json(filteredProducts);
 
-    res.json(products);
   } catch (error) {
-    console.error('Error fetching products by author:', error);
-    res.status(500).json({ error: 'Failed to fetch products by author' });
+    console.error('Error fetching products:', error.response?.data || error.message);
+    res.status(500).send('Error fetching products');
   }
 });
 
+// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
