@@ -17,7 +17,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 app.get('/fetch-products-by-author', async (req, res) => {
   try {
     const author = req.query.author;
-    const productsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`;
+    const productsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json?limit=250`;
 
     // Fetch all products
     const productsResponse = await axios.get(productsUrl, {
