@@ -11,27 +11,41 @@ const SHOPIFY_STORE_URL = 'https://k0e2gg-bs.myshopify.com';
 app.use(cors()); // Enable CORS for all origins
 app.use(express.json());
 
-// Fetch all products and filter by metafield
+const RATE_LIMIT_DELAY = 500; // 500ms delay between requests (2 calls/sec limit)
+
+// Function to fetch products
+async function fetchProducts() {
+  const productsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`;
+  const response = await axios.get(productsUrl, {
+    headers: { 'X-Shopify-Access-Token': ACCESS_TOKEN },
+  });
+  return response.data.products;
+}
+
+// Function to fetch metafields for a specific product
+async function fetchMetafields(productId) {
+  const metafieldsUrl = `${SHOPIFY_STORE_URL}/admin/api/2024-01/products/${productId}/metafields.json`;
+  const response = await axios.get(metafieldsUrl, {
+    headers: { 'X-Shopify-Access-Token': ACCESS_TOKEN },
+  });
+  return response.data.metafields;
+}
+
+// Route to fetch products for a specific author
 app.get('/fetch-products/:author', async (req, res) => {
   const author = req.params.author; // e.g., "william-shakespeare"
 
   try {
     // Step 1: Fetch all products
-    const productsResponse = await axios.get(`${SHOPIFY_STORE_URL}/admin/api/2024-01/products.json`, {
-      headers: { 'X-Shopify-Access-Token': ACCESS_TOKEN },
-    });
-
-    const products = productsResponse.data.products;
+    const products = await fetchProducts();
     const filteredProducts = [];
 
-    // Step 2: Loop through products and fetch their metafields
+    // Step 2: Process products one by one (with rate-limiting)
     for (const product of products) {
-      const metafieldsResponse = await axios.get(
-        `${SHOPIFY_STORE_URL}/admin/api/2024-01/products/${product.id}/metafields.json`,
-        { headers: { 'X-Shopify-Access-Token': ACCESS_TOKEN } }
-      );
+      // Introduce delay to stay within rate limits
+      await new Promise((resolve) => setTimeout(resolve, RATE_LIMIT_DELAY));
 
-      const metafields = metafieldsResponse.data.metafields;
+      const metafields = await fetchMetafields(product.id);
 
       // Check if the product's metafields match the author
       const authorMetafield = metafields.find(
