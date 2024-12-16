@@ -1,6 +1,6 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
+import express from 'express';
+import { request, gql } from 'graphql-request';
+import cors from 'cors';
 
 const app = express();
 
@@ -9,9 +9,6 @@ app.use(express.json());
 
 const ACCESS_TOKEN = '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';
 const SHOPIFY_GRAPHQL_URL = 'https://k0e2gg-bs.myshopify.com/admin/api/2024-01/graphql.json';
-
-// Dynamically import graphql-request
-const { request, gql } = await import('graphql-request');
 
 const GET_PRODUCTS_QUERY = gql`
   query getProducts($cursor: String, $author: String!) {
